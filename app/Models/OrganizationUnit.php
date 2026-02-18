@@ -35,4 +35,20 @@ class OrganizationUnit extends Model
     {
         return $this->children()->with('allChildren');
     }
+
+    /**
+     * Get IDs of this unit and all its descendants recursively.
+     * 
+     * @return array<int>
+     */
+    public function getDescendantUnitIds(): array
+    {
+        $ids = [$this->id];
+
+        foreach ($this->children as $child) {
+            $ids = array_merge($ids, $child->getDescendantUnitIds());
+        }
+
+        return $ids;
+    }
 }   

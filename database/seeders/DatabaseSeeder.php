@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             PositionSeeder::class,
             OrganizationUnitSeeder::class,
             RolePermissionSeeder::class,
-            RoleContextResolverSeeder::class,
+
             UserSeeder::class,
         ]);
     }

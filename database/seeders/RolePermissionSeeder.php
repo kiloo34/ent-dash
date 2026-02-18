@@ -39,8 +39,8 @@ class RolePermissionSeeder extends Seeder
         // Roles
         // ========================
         $superAdmin = Role::updateOrCreate(['name' => \App\Enums\RoleType::SUPER_ADMIN->value,'guard_name' => 'web']);
-        $edmAdmin = Role::updateOrCreate(['name' => \App\Enums\RoleType::EDM_ADMIN->value,'guard_name' => 'web']);
-        $edmMember = Role::updateOrCreate(['name' => \App\Enums\RoleType::EDM_MEMBER->value,'guard_name' => 'web']);
+        $admin = Role::updateOrCreate(['name' => \App\Enums\RoleType::ADMIN->value,'guard_name' => 'web']);
+        $member = Role::updateOrCreate(['name' => \App\Enums\RoleType::MEMBER->value,'guard_name' => 'web']);
 
         // ========================
         // Mapping Permission
@@ -49,22 +49,21 @@ class RolePermissionSeeder extends Seeder
         // Super Admin → semua permission
         $superAdmin->syncPermissions(Permission::all());
 
-        // EDM Admin
-        $edmAdmin->syncPermissions([
+        // Admin
+        $admin->syncPermissions([
             'view-dashboard',
             'view-branch-dashboard',
             'view-division-dashboard',
             'export-report',
-            'manage-dashboard-config',
-            'manage-report-config',
         ]);
 
-        // EDM Member
-        $edmMember->syncPermissions([
+        // Member
+        $member->syncPermissions([
             'view-dashboard',
             'view-branch-dashboard',
             'view-division-dashboard',
-            'export-report',
         ]);
+
+
     }
 }

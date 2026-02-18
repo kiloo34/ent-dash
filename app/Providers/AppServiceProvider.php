@@ -8,8 +8,6 @@ use Gate;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use App\Models\Transaction;
-use App\Observers\TransactionObserver;
 use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,15 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(
-            \App\Repositories\Dashboard\Contracts\BranchDashboardRepositoryInterface::class,
-            \App\Repositories\Dashboard\BranchDashboardRepository::class
-        );
 
-        $this->app->bind(
-            \App\Repositories\Dashboard\Contracts\DivisionDashboardRepositoryInterface::class,
-            \App\Repositories\Dashboard\DivisionDashboardRepository::class
-        );
     }
 
     /**
@@ -35,10 +25,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Transaction::observe(TransactionObserver::class);
         $this->configureDefaults();
         $this->registerMonitoring();
         Gate::define('viewDashboard', [DashboardPolicy::class, 'viewDashboard']);
+
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Auth\Events\Failed::class,
+            \App\Listeners\LogFailedLogin::class
+        );
     }
 
     protected function registerMonitoring(): void

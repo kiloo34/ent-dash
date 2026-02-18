@@ -18,82 +18,60 @@ class UserSeeder extends Seeder
     {
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $sevp = Position::where('name', 'SEVP')->first();
-        $vp = Position::where('name', 'VP')->first();
-        $avp = Position::where('name', 'AVP')->first();
-        $officer = Position::where('name', 'Officer')->first();
+        // Positions
+        $direkturPos = Position::where('name', 'Direktur')->first();
+        $sevpPos = Position::where('name', 'SEVP')->first();
+        $vpPos = Position::where('name', 'VP')->first();
+        $avpPos = Position::where('name', 'AVP')->first();
+        $officerPos = Position::where('name', 'Officer')->first();
 
-        $divisiIT = OrganizationUnit::where('name', 'Divisi IT')->first();
-        $subEdm = OrganizationUnit::where('name', 'Subdivisi Enterprise Data Management')->first();
+        // Units
+        $direktorat = OrganizationUnit::where('pluck_code', 'DIR_TI')->first();
+        $sevpTI = OrganizationUnit::where('pluck_code', 'SEVP_TI')->first();
+        $divisiTI = OrganizationUnit::where('pluck_code', 'DIV_TI')->first();
+        $divisiDigital = OrganizationUnit::where('pluck_code', 'DIV_DIG')->first();
+        $subEdm = OrganizationUnit::where('pluck_code', 'EDM')->first();
 
-        // ===== SEVP =====
-        $sevpUser = User::updateOrCreate(
-            ['email' => 'sevp.it@company.com'],
-            [
-                'name' => 'SEVP IT',
-                'password' => Hash::make('password'),
-                'position_id' => $sevp->id,
-                'organization_unit_id' => $divisiIT->id,
-            ]
+        // 1. Direktur TI (ADMIN)
+        $direktur = User::updateOrCreate(
+            ['email' => 'direktur.ti@company.com'],
+            ['name' => 'Direktur TI', 'password' => Hash::make('password'), 'position_id' => $direkturPos->id, 'organization_unit_id' => $direktorat->id]
         );
+        $direktur->assignRole(\App\Enums\RoleType::ADMIN->value);
 
-        // ===== VP (Head of Division IT) =====
-        $vpUser = User::updateOrCreate(
-            ['email' => 'vp.it@company.com'],
-            [
-                'name' => 'VP IT',
-                'password' => Hash::make('password'),
-                'position_id' => $vp->id,
-                'organization_unit_id' => $divisiIT->id,
-                'direct_superior_id' => $sevpUser->id,
-            ]
+        // 2. SEVP TI
+        $sevp = User::updateOrCreate(
+            ['email' => 'sevp.ti@company.com'],
+            ['name' => 'SEVP TI', 'password' => Hash::make('password'), 'position_id' => $sevpPos->id, 'organization_unit_id' => $sevpTI->id, 'direct_superior_id' => $direktur->id]
         );
+        $sevp->assignRole(\App\Enums\RoleType::ADMIN->value);
 
-        // ===== AVP (Head of Subdivision EDM) =====
-        $avpUser = User::updateOrCreate(
+        // 3. VP TI (Head of Divisi TI)
+        $vpTI = User::updateOrCreate(
+            ['email' => 'vp.ti@company.com'],
+            ['name' => 'VP TI', 'password' => Hash::make('password'), 'position_id' => $vpPos->id, 'organization_unit_id' => $divisiTI->id, 'direct_superior_id' => $sevp->id]
+        );
+        $vpTI->assignRole(\App\Enums\RoleType::ADMIN->value);
+
+        // 4. VP Digital (Head of Divisi Digital Banking)
+        $vpDigital = User::updateOrCreate(
+            ['email' => 'vp.digital@company.com'],
+            ['name' => 'VP Digital Banking', 'password' => Hash::make('password'), 'position_id' => $vpPos->id, 'organization_unit_id' => $divisiDigital->id, 'direct_superior_id' => $sevp->id]
+        );
+        $vpDigital->assignRole(\App\Enums\RoleType::ADMIN->value);
+
+        // 5. AVP EDM (Under Divisi TI)
+        $avpEdm = User::updateOrCreate(
             ['email' => 'avp.edm@company.com'],
-            [
-                'name' => 'AVP Enterprise Data Management',
-                'password' => Hash::make('password'),
-                'position_id' => $avp->id,
-                'organization_unit_id' => $subEdm->id,
-                'direct_superior_id' => $vpUser->id,
-            ]
+            ['name' => 'AVP EDM', 'password' => Hash::make('password'), 'position_id' => $avpPos->id, 'organization_unit_id' => $subEdm->id, 'direct_superior_id' => $vpTI->id]
         );
+        $avpEdm->assignRole(\App\Enums\RoleType::ADMIN->value);
 
-        // ===== Officers per Group =====
-        $groups = OrganizationUnit::where('type', 'group')
-            ->whereIn('name', [
-                'Group Data Analytics & Data Science',
-                'Group Bussiness Intelligence',
-                'Group Big Data & Data Warehouse',
-            ])
-            ->get();
-
-        foreach ($groups as $group) {
-            for ($i = 1; $i <= 3; $i++) {
-
-                $user = User::updateOrCreate(
-                    [
-                        'email' => "{$group->pluck_code}.officer{$i}@company.com"
-                    ],
-                    [
-                        'name' => $group->name . " Officer {$i}",
-                        'password' => Hash::make('password'),
-                        'position_id' => $officer->id,
-                        'organization_unit_id' => $group->id,
-                        'direct_superior_id' => $avpUser->id,
-                    ]
-                );
-                
-                if ($i === 1) {
-                    $user->assignRole(\App\Enums\RoleType::SUPER_ADMIN->value); // 3 officer akan jadi super-admin
-                } else if ($i === 2) {
-                    $user->assignRole(\App\Enums\RoleType::EDM_ADMIN->value); // atau edm-member sesuai kebutuhan
-                } else {
-                    $user->assignRole(\App\Enums\RoleType::EDM_MEMBER->value); // atau edm-member sesuai kebutuhan
-                }
-            }
-        }
+        // 6. Super Admin (Officer EDM - Member)
+        $officerEdm = User::updateOrCreate(
+            ['email' => 'officer.edm@company.com'],
+            ['name' => 'Officer EDM', 'password' => Hash::make('password'), 'position_id' => $officerPos->id, 'organization_unit_id' => $subEdm->id, 'direct_superior_id' => $avpEdm->id]
+        );
+        $officerEdm->assignRole(\App\Enums\RoleType::SUPER_ADMIN->value);
     }
 }

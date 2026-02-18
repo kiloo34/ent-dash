@@ -10,6 +10,12 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     use AuthorizesRequests;
+    /**
+     * Dashboard Redirect Resolver
+     * 
+     * Handles the redirection of users to their specific dashboard route 
+     * based on their role and organizational unit.
+     */
     public function index()
     {
         $resolver = DashboardResolverFactory::make(auth()->user());
@@ -19,70 +25,16 @@ class DashboardController extends Controller
         );
     }
 
-    public function showBranch(\App\Http\Requests\Dashboard\BranchDashboardRequest $request)
+    /**
+     * Show Superadmin Dashboard
+     * 
+     * Renders the administrative dashboard with system metrics and trends.
+     */
+    public function show()
     {
-        $this->authorize('viewDashboard');
+        $resolver = DashboardResolverFactory::make(auth()->user());
+        $data = $resolver->resolveServices();
 
-        try {
-            $user = auth()->user();
-            $resolver = DashboardResolverFactory::make($user);
-            $services = $resolver->resolveServices();
-
-            $filters = \App\DTOs\DashboardFilterDto::fromRequest($request);
-
-            \Log::channel('enterprise')->info('Dashboard Access: Branch', [
-                'user_id' => $user->id,
-                'region' => $filters->region,
-                'period' => [
-                    'start' => $filters->startDate,
-                    'end' => $filters->endDate
-                ]
-            ]);
-
-            $data = $services['branch']->getData($user, $filters);
-
-            return new \App\Http\Resources\DashboardSummaryResource($data);
-        } catch (\Exception $e) {
-            \Log::channel('enterprise')->error('Dashboard Error: Branch', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request' => $request->all()
-            ]);
-
-            throw $e;
-        }
+        return view('superadmin.dashboard', $data);
     }
-
-
-    public function showDivision(Request $request)
-    {
-        $this->authorize('viewDashboard');
-
-        try {
-            $user = auth()->user();
-            $resolver = DashboardResolverFactory::make($user);
-            $services = $resolver->resolveServices();
-
-            $filters = \App\DTOs\DashboardFilterDto::fromRequest($request);
-
-            \Log::channel('enterprise')->info('Dashboard Access: Division', [
-                'user_id' => $user->id,
-                'filters' => $request->all()
-            ]);
-
-            $data = $services['division']->getData($user, $filters);
-
-            return new \App\Http\Resources\DashboardSummaryResource($data);
-        } catch (\Exception $e) {
-            \Log::channel('enterprise')->error('Dashboard Error: Division', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            throw $e;
-        }
-    }
-
 }

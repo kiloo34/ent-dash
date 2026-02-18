@@ -3,7 +3,7 @@
 namespace App\Services\Dashboard;
 
 use App\Models\User;
-use App\Models\RoleContextResolver;
+
 
 class DashboardResolverFactory
 {
@@ -18,7 +18,8 @@ class DashboardResolverFactory
 
             $resolverClass = match ($role) {
                 \App\Enums\RoleType::SUPER_ADMIN => SuperAdminResolver::class,
-                \App\Enums\RoleType::EDM_ADMIN, \App\Enums\RoleType::EDM_MEMBER => EdmResolver::class,
+                \App\Enums\RoleType::ADMIN, 
+                \App\Enums\RoleType::MEMBER => EdmResolver::class,
                 default => null,
             };
 

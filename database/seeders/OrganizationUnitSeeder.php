@@ -10,32 +10,55 @@ class OrganizationUnitSeeder extends Seeder
 {
     public function run(): void
     {
-        // ===== Divisi =====
-        $divisiIT = OrganizationUnit::updateOrCreate(
-            ['name' => 'Divisi IT', 'pluck_code' => 'IT'],
-            ['type' => 'division', 'parent_id' => null, 'is_active' => true]
+        // 1. Level Direktorat
+        $direktorat = OrganizationUnit::updateOrCreate(
+            ['pluck_code' => 'DIR_TI'],
+            ['name' => 'Direktorat TI', 'type' => 'directorate', 'parent_id' => null]
         );
 
-        // ===== Subdivisi IT =====
-        $subEdm = OrganizationUnit::updateOrCreate(
-            ['name' => 'Subdivisi Enterprise Data Management', 'pluck_code' => 'EDM'],
-            ['type' => 'subdivision', 'parent_id' => $divisiIT->id, 'is_active' => true]
+        // 2. Level SEVP
+        $sevp = OrganizationUnit::updateOrCreate(
+            ['pluck_code' => 'SEVP_TI'],
+            ['name' => 'SEVP TI', 'type' => 'sevp', 'parent_id' => $direktorat->id]
         );
 
-        // ===== Group IT =====
+        // 3. Level Divisi (VP)
+        $divisiTI = OrganizationUnit::updateOrCreate(
+            ['pluck_code' => 'DIV_TI'],
+            ['name' => 'Divisi TI', 'type' => 'division', 'parent_id' => $sevp->id]
+        );
+
+        $divisiDigital = OrganizationUnit::updateOrCreate(
+            ['pluck_code' => 'DIV_DIG'],
+            ['name' => 'Divisi Digital Banking', 'type' => 'division', 'parent_id' => $sevp->id]
+        );
+
+        $divisiUmum = OrganizationUnit::updateOrCreate(
+            ['pluck_code' => 'DIV_UMUM'],
+            ['name' => 'Divisi Umum', 'type' => 'division', 'parent_id' => $sevp->id]
+        );
+
+        // 4. Level Sub-Divisi (AVP)
+        // Sub Divisi di TI
         OrganizationUnit::updateOrCreate(
-            ['name' => 'Group Data Analytics & Data Science', 'pluck_code' => 'DADS'],
-            ['type' => 'group', 'parent_id' => $subEdm->id, 'is_active' => true]
+            ['pluck_code' => 'EDM'],
+            ['name' => 'Enterprise Data Management', 'type' => 'subdivision', 'parent_id' => $divisiTI->id]
         );
 
         OrganizationUnit::updateOrCreate(
-            ['name' => 'Group Bussiness Intelligence', 'pluck_code' => 'BI'],
-            ['type' => 'group', 'parent_id' => $subEdm->id, 'is_active' => true]
+            ['pluck_code' => 'OPS_TI'],
+            ['name' => 'Operasional TI', 'type' => 'subdivision', 'parent_id' => $divisiTI->id]
+        );
+
+        // Sub Divisi di Digital Banking
+        OrganizationUnit::updateOrCreate(
+            ['pluck_code' => 'DEV_DIG'],
+            ['name' => 'Pengembangan Digital', 'type' => 'subdivision', 'parent_id' => $divisiDigital->id]
         );
 
         OrganizationUnit::updateOrCreate(
-            ['name' => 'Group Big Data & Data Warehouse', 'pluck_code' => 'BDDW'],
-            ['type' => 'group', 'parent_id' => $subEdm->id, 'is_active' => true]
+            ['pluck_code' => 'QA_DIG'],
+            ['name' => 'QA Digital', 'type' => 'subdivision', 'parent_id' => $divisiDigital->id]
         );
     }
 }
