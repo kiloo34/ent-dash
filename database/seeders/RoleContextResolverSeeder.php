@@ -15,7 +15,7 @@ class RoleContextResolverSeeder extends Seeder
     {
         RoleContextResolver::updateOrCreate(
             [
-                'role_name' => 'super-admin',
+                'role_name' => \App\Enums\RoleType::SUPER_ADMIN->value,
                 'context'   => 'dashboard',
             ],
             [
@@ -26,7 +26,7 @@ class RoleContextResolverSeeder extends Seeder
 
         RoleContextResolver::updateOrCreate(
             [
-                'role_name' => 'edm-admin',
+                'role_name' => \App\Enums\RoleType::EDM_ADMIN->value,
                 'context'   => 'dashboard',
             ],
             [
@@ -37,7 +37,7 @@ class RoleContextResolverSeeder extends Seeder
 
         RoleContextResolver::updateOrCreate(
             [
-                'role_name' => 'edm-member',
+                'role_name' => \App\Enums\RoleType::EDM_MEMBER->value,
                 'context'   => 'dashboard',
             ],
             [

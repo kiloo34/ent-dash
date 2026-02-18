@@ -87,11 +87,11 @@ class UserSeeder extends Seeder
                 );
                 
                 if ($i === 1) {
-                    $user->assignRole('super-admin'); // 3 officer akan jadi super-admin
+                    $user->assignRole(\App\Enums\RoleType::SUPER_ADMIN->value); // 3 officer akan jadi super-admin
                 } else if ($i === 2) {
-                    $user->assignRole('edm-admin'); // atau edm-member sesuai kebutuhan
+                    $user->assignRole(\App\Enums\RoleType::EDM_ADMIN->value); // atau edm-member sesuai kebutuhan
                 } else {
-                    $user->assignRole('edm-member'); // atau edm-member sesuai kebutuhan
+                    $user->assignRole(\App\Enums\RoleType::EDM_MEMBER->value); // atau edm-member sesuai kebutuhan
                 }
             }
         }

@@ -12,8 +12,8 @@ class EdmResolver extends DashboardResolver
     public function resolveServices(): array
     {
         return [
-            'branch' => new BranchDashboardService(),
-            'division' => new DivisionDashboardService(),
+            'branch' => app(\App\Services\Dashboard\BranchDashboardService::class),
+            'division' => app(\App\Services\Dashboard\DivisionDashboardService::class),
         ];
     }
 

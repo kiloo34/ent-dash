@@ -5,33 +5,46 @@ namespace App\Repositories\Dashboard;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class BranchDashboardRepository
+use App\Repositories\Dashboard\Contracts\BranchDashboardRepositoryInterface;
+
+class BranchDashboardRepository implements BranchDashboardRepositoryInterface
 {
-    public function getSummary(User $user, array $filters = [])
+    public function getSummary(User $user, \App\DTOs\DashboardFilterDto $filters): \Illuminate\Support\Collection
     {
-        $query = DB::table('transactions');
+        $query = DB::table('app.transactions');
+        $query = $this->applyVisibility($query, $user);
 
-        if (!empty($filters['start_date'])) {
-            $query->whereDate('transaction_date', '>=', $filters['start_date']);
+        if ($filters->startDate) {
+            $query->whereDate('transaction_date', '>=', $filters->startDate);
         }
 
-        if (!empty($filters['end_date'])) {
-            $query->whereDate('transaction_date', '<=', $filters['end_date']);
+        if ($filters->endDate) {
+            $query->whereDate('transaction_date', '<=', $filters->endDate);
         }
 
-        if (!empty($filters['region'])) {
-            $query->where('region_code', $filters['region']);
+        if ($filters->region) {
+            $query->where('region_code', $filters->region);
         }
 
-        return [
-            'total_branches' => $query->distinct('branch_id')->count('branch_id'),
-            'total_transactions' => $query->count(),
-        ];
+        $version = cache()->get('dashboard_cache_version', 'default');
+        $cacheKey = 'v' . $version . '_branch_dashboard_' . $user->id . '_' . md5(json_encode((array)$filters));
+
+        return cache()->remember($cacheKey, config('dashboard.cache.ttl'), function () use ($query) {
+            $result = $query->selectRaw('count(distinct branch_id) as total_branches, count(*) as total_transactions')->first();
+
+            return collect([
+                'total_branches' => $result->total_branches,
+                'total_transactions' => $result->total_transactions,
+            ]);
+        });
     }
 
     private function applyVisibility($query, User $user)
     {
-        if ($user->hasAnyRole(['edm-admin', 'edm-member', 'super-admin'])) {
+        if ($user->hasAnyRole([
+            \App\Enums\RoleType::EDM_ADMIN->value,
+            \App\Enums\RoleType::SUPER_ADMIN->value
+        ])) {
             return $query;
         }
 

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class OrganizationUnit extends Model
 {
+    use HasFactory;
     protected $table = 'app.organization_units';
     protected $fillable = [
         'name',

@@ -88,20 +88,6 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'direct_superior_id');
     }
 
-    public function resolveDashboardRoute(): string
-    {
-        foreach ($this->roles as $role) {
-            dump($role->name);
-            $mapping = DashboardRoute::where('role_name', $role->name)
-                ->where('is_active', true)
-                ->first();
 
-            if ($mapping) {
-                return $mapping->route_name;
-            }
-        }
-
-        abort(403, 'No dashboard mapping found.');
-    }
 
 }

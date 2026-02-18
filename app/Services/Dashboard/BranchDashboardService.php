@@ -6,23 +6,25 @@ use App\Models\User;
 use App\Repositories\Dashboard\BranchDashboardRepository;
 use App\Services\Dashboard\Contracts\DashboardDataServiceInterface;
 
+use App\Repositories\Dashboard\Contracts\BranchDashboardRepositoryInterface;
+
 class BranchDashboardService implements DashboardDataServiceInterface
 {
-    protected BranchDashboardRepository $repository;
+    protected BranchDashboardRepositoryInterface $repository;
 
-    public function __construct()
+    public function __construct(BranchDashboardRepositoryInterface $repository)
     {
-        $this->repository = new BranchDashboardRepository();
+        $this->repository = $repository;
     }
 
-    public function getData(User $user, array $filters = []): array
+    public function getData(User $user, \App\DTOs\DashboardFilterDto $filters): \App\DTOs\DashboardSummaryDto
     {
         $summary = $this->repository->getSummary($user, $filters);
 
-        return [
-            'type' => 'branch',
-            'filters' => $filters,
-            'data' => $summary,
-        ];
+        return new \App\DTOs\DashboardSummaryDto(
+            type: 'branch',
+            filters: $filters,
+            data: $summary,
+        );
     }
 }

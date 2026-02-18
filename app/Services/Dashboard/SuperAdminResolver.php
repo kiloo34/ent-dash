@@ -12,8 +12,8 @@ class SuperAdminResolver extends DashboardResolver
     public function resolveServices(): array
     {
         return [
-            'branch' => new BranchDashboardService(),
-            'division' => new DivisionDashboardService(),
+            'branch' => app(BranchDashboardService::class),
+            'division' => app(DivisionDashboardService::class),
         ];
     }
 

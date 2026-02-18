@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('CREATE SCHEMA IF NOT EXISTS app');
+        }
+        
         Schema::table('app.users', function (Blueprint $table) {
             $table->text('two_factor_secret')->after('password')->nullable();
             $table->text('two_factor_recovery_codes')->after('two_factor_secret')->nullable();

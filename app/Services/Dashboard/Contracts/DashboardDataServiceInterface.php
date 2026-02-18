@@ -6,5 +6,5 @@ use App\Models\User;
 
 interface DashboardDataServiceInterface
 {
-    public function getData(User $user, array $filters = []): array;
+    public function getData(User $user, \App\DTOs\DashboardFilterDto $filters): \App\DTOs\DashboardSummaryDto;
 }

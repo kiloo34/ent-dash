@@ -9,18 +9,24 @@ class DashboardResolverFactory
 {
     public static function make(User $user): DashboardResolver
     {
-        foreach ($user->roles as $role) {
+        $roleValues = $user->roles->pluck('name')->toArray();
 
-            $mapping = RoleContextResolver::where('role_name', $role->name)
-                ->where('context', 'dashboard')
-                ->where('is_active', true)
-                ->first();
+        foreach ($roleValues as $roleValue) {
+            $role = \App\Enums\RoleType::tryFrom($roleValue);
 
-            if ($mapping && class_exists($mapping->resolver_class)) {
-                return new $mapping->resolver_class($user);
+            if (!$role) continue;
+
+            $resolverClass = match ($role) {
+                \App\Enums\RoleType::SUPER_ADMIN => SuperAdminResolver::class,
+                \App\Enums\RoleType::EDM_ADMIN, \App\Enums\RoleType::EDM_MEMBER => EdmResolver::class,
+                default => null,
+            };
+
+            if ($resolverClass) {
+                return new $resolverClass($user);
             }
         }
 
-        abort(403, 'No dashboard resolver found.');
+        abort(403, 'No dashboard resolver found for your roles.');
     }
 }

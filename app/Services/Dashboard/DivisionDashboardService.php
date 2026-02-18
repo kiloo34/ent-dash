@@ -6,23 +6,26 @@ use App\Models\User;
 use App\Repositories\Dashboard\DivisionDashboardRepository;
 use App\Services\Dashboard\Contracts\DashboardDataServiceInterface;
 
+use App\Repositories\Dashboard\Contracts\DivisionDashboardRepositoryInterface;
+
 class DivisionDashboardService implements DashboardDataServiceInterface
 {
-    protected DivisionDashboardRepository $repository;
+    protected DivisionDashboardRepositoryInterface $repository;
 
-    public function __construct()
+    public function __construct(DivisionDashboardRepositoryInterface $repository)
     {
-        $this->repository = new DivisionDashboardRepository();
+        $this->repository = $repository;
     }
 
-    public function getData(User $user, array $filters = []): array
+    public function getData(User $user, \App\DTOs\DashboardFilterDto $filters): \App\DTOs\DashboardSummaryDto
     {
-        return [
-            'type' => 'division',
-            'total_divisions' => 15,
-            'total_kpi' => 320,
-            'generated_by' => $user->name,
-        ];
+        $summary = $this->repository->getSummary($user, $filters);
+
+        return new \App\DTOs\DashboardSummaryDto(
+            type: 'division',
+            filters: $filters,
+            data: $summary,
+        );
     }
 
 }

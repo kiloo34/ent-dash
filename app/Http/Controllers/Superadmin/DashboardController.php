@@ -19,32 +19,70 @@ class DashboardController extends Controller
         );
     }
 
-    public function showBranch(Request $request)
+    public function showBranch(\App\Http\Requests\Dashboard\BranchDashboardRequest $request)
     {
-        $resolver = DashboardResolverFactory::make(auth()->user());
-        $services = $resolver->resolveServices();
+        $this->authorize('viewDashboard');
 
-        $filters = $request->only([
-            'start_date',
-            'end_date',
-            'region',
-        ]);
+        try {
+            $user = auth()->user();
+            $resolver = DashboardResolverFactory::make($user);
+            $services = $resolver->resolveServices();
 
-        $data = $services['branch']->getData(auth()->user(), $filters);
+            $filters = \App\DTOs\DashboardFilterDto::fromRequest($request);
 
-        return response()->json($data);
+            \Log::channel('enterprise')->info('Dashboard Access: Branch', [
+                'user_id' => $user->id,
+                'region' => $filters->region,
+                'period' => [
+                    'start' => $filters->startDate,
+                    'end' => $filters->endDate
+                ]
+            ]);
+
+            $data = $services['branch']->getData($user, $filters);
+
+            return new \App\Http\Resources\DashboardSummaryResource($data);
+        } catch (\Exception $e) {
+            \Log::channel('enterprise')->error('Dashboard Error: Branch', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            throw $e;
+        }
     }
 
 
-    public function showDivision()
+    public function showDivision(Request $request)
     {
-        $resolver = DashboardResolverFactory::make(auth()->user());
+        $this->authorize('viewDashboard');
 
-        $services = $resolver->resolveServices();
+        try {
+            $user = auth()->user();
+            $resolver = DashboardResolverFactory::make($user);
+            $services = $resolver->resolveServices();
 
-        $data = $services['division']->getData(auth()->user());
+            $filters = \App\DTOs\DashboardFilterDto::fromRequest($request);
 
-        return response()->json($data);
+            \Log::channel('enterprise')->info('Dashboard Access: Division', [
+                'user_id' => $user->id,
+                'filters' => $request->all()
+            ]);
+
+            $data = $services['division']->getData($user, $filters);
+
+            return new \App\Http\Resources\DashboardSummaryResource($data);
+        } catch (\Exception $e) {
+            \Log::channel('enterprise')->error('Dashboard Error: Division', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            throw $e;
+        }
     }
 
 }

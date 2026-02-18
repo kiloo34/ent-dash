@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('CREATE SCHEMA IF NOT EXISTS app');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('CREATE SCHEMA IF NOT EXISTS app');
+        }
         
         Schema::create('app.users', function (Blueprint $table) {
             $table->id();

@@ -38,9 +38,9 @@ class RolePermissionSeeder extends Seeder
         // ========================
         // Roles
         // ========================
-        $superAdmin = Role::updateOrCreate(['name' => 'super-admin','guard_name' => 'web']);
-        $edmAdmin = Role::updateOrCreate(['name' => 'edm-admin','guard_name' => 'web']);
-        $edmMember = Role::updateOrCreate(['name' => 'edm-member','guard_name' => 'web']);
+        $superAdmin = Role::updateOrCreate(['name' => \App\Enums\RoleType::SUPER_ADMIN->value,'guard_name' => 'web']);
+        $edmAdmin = Role::updateOrCreate(['name' => \App\Enums\RoleType::EDM_ADMIN->value,'guard_name' => 'web']);
+        $edmMember = Role::updateOrCreate(['name' => \App\Enums\RoleType::EDM_MEMBER->value,'guard_name' => 'web']);
 
         // ========================
         // Mapping Permission
