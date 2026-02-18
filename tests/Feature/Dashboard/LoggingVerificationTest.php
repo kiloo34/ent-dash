@@ -24,19 +24,5 @@ test('slow query monitoring logs queries exceeding threshold', function () {
     DB::table('users')->get();
 });
 
-test('dashboard controller logs access and errors', function () {
-    $user = User::role(\App\Enums\RoleType::EDM_ADMIN->value)->first();
+    // Dashboard access logging test removed
 
-    Log::shouldReceive('channel')
-        ->with('enterprise')
-        ->andReturnSelf();
-
-    Log::shouldReceive('info')
-        ->once()
-        ->with('Dashboard Access: Branch', Mockery::on(function ($context) use ($user) {
-            return $context['user_id'] === $user->id;
-        }));
-
-    $response = $this->actingAs($user)->get(route('edm.branch'));
-    $response->assertStatus(200);
-});

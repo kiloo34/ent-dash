@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('pluck_code')->unique();
 
-            $table->enum('type', ['division', 'subdivision', 'group']);
+            $table->enum('type', ['directorate', 'sevp', 'division', 'subdivision']);
 
             $table->foreignId('parent_id')
                 ->nullable()

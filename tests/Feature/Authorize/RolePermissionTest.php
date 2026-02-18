@@ -13,46 +13,40 @@ beforeEach(function () {
     $this->seed();
 });
 
-test('there are exactly 3 super admins', function () {
-    $count = User::role('super-admin')->count();
-    expect($count)->toBe(3);
+test('there is exactly 1 super admin', function () {
+    $count = User::role(\App\Enums\RoleType::SUPER_ADMIN->value)->count();
+    expect($count)->toBe(1);
 });
 
 test('super admin has all permissions', function () {
-    $user = User::role('super-admin')->first();
+    $user = User::role(\App\Enums\RoleType::SUPER_ADMIN->value)->first();
     expect($user)->not->toBeNull();
     foreach (Permission::all() as $permission) {
         expect($user->hasPermissionTo($permission->name))->toBeTrue();
     }
 });
 
-test('edm admin does not have manage role permission', function () {
-    $user = User::role('edm-admin')->first();
+test('admin does not have manage role permission', function () {
+    $user = User::role(\App\Enums\RoleType::ADMIN->value)->first();
     expect($user)->not->toBeNull();
     expect($user->hasPermissionTo('manage-role'))->toBeFalse();
 });
 
-test('non role structural positions have no system access', function () {
-    $user = User::whereHas('position', function ($q) {
-        $q->whereIn('name', ['SEVP', 'VP', 'AVP']);
-    })->first();
-    expect($user)->not->toBeNull();
-    expect($user->roles->count())->toBe(0);
+test('all structural positions have roles assigned', function () {
+    $users = User::all();
+    foreach ($users as $user) {
+        expect($user->roles->count())->toBeGreaterThan(0);
+    }
 });
 
 test('factory returns correct resolver for super admin', function () {
-
-    $user = \App\Models\User::role('super-admin')->first();
-
+    $user = User::role(\App\Enums\RoleType::SUPER_ADMIN->value)->first();
     $resolver = DashboardResolverFactory::make($user);
-
     expect($resolver)->toBeInstanceOf(SuperAdminResolver::class);
 });
 
-test('dashboard redirect works correctly', function () {
-
-    $user = \App\Models\User::role('super-admin')->first();
-
+test('dashboard redirect works correctly for super admin', function () {
+    $user = User::role(\App\Enums\RoleType::SUPER_ADMIN->value)->first();
     $response = $this->actingAs($user)
         ->get(route('dashboard'));
 

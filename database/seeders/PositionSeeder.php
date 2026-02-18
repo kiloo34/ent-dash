@@ -22,11 +22,13 @@ class PositionSeeder extends Seeder
         ];
 
         foreach ($positions as $position) {
-            Position::create([
-                'name' => $position['name'],
-                'level' => $position['level'],
-                'is_active' => true,
-            ]);
+            Position::updateOrCreate(
+                ['name' => $position['name']],
+                [
+                    'level' => $position['level'],
+                    'is_active' => true,
+                ]
+            );
         }        
     }
 }

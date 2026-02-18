@@ -16,6 +16,29 @@
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+
+                @can('manage-user')
+                    <flux:sidebar.group :heading="__('Administration')" class="grid">
+                        <flux:sidebar.item icon="scroll-text" :href="route('superadmin.activity-logs')" :current="request()->routeIs('superadmin.activity-logs')" wire:navigate>
+                            {{ __('Activity Logs') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="building-2" :href="route('superadmin.organization.units')" :current="request()->routeIs('superadmin.organization.units')" wire:navigate>
+                            {{ __('Organization Units') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="briefcase" :href="route('superadmin.organization.positions')" :current="request()->routeIs('superadmin.organization.positions')" wire:navigate>
+                            {{ __('Positions') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+
+                    <flux:sidebar.group :heading="__('Security')" class="grid">
+                        <flux:sidebar.item icon="shield-check" :href="route('superadmin.roles.index')" :current="request()->routeIs('superadmin.roles.index')" wire:navigate>
+                            {{ __('Roles') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="key" :href="route('superadmin.permissions.index')" :current="request()->routeIs('superadmin.permissions.index')" wire:navigate>
+                            {{ __('Permissions') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endcan
             </flux:sidebar.nav>
 
             <flux:spacer />

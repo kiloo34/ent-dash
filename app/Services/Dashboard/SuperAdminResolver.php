@@ -12,8 +12,16 @@ class SuperAdminResolver extends DashboardResolver
     public function resolveServices(): array
     {
         return [
-            'branch' => app(BranchDashboardService::class),
-            'division' => app(DivisionDashboardService::class),
+            'stats' => [
+                'users' => \App\Models\User::count(),
+                'units' => \App\Models\OrganizationUnit::count(),
+                'positions' => \App\Models\Position::count(),
+                'activity' => \Spatie\Activitylog\Models\Activity::count(),
+            ],
+            'recent_activity' => \Spatie\Activitylog\Models\Activity::with('causer')
+                ->latest()
+                ->take(5)
+                ->get(),
         ];
     }
 

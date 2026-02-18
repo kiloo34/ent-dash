@@ -14,14 +14,15 @@ return new class extends Migration
         return config('telescope.storage.database.connection');
     }
 
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('CREATE SCHEMA IF NOT EXISTS app');
+        }
+
         $schema = Schema::connection($this->getConnection());
 
-        $schema->create('telescope_entries', function (Blueprint $table) {
+        $schema->create('app.telescope_entries', function (Blueprint $table) {
             $table->bigIncrements('sequence');
             $table->uuid('uuid');
             $table->uuid('batch_id');
@@ -38,7 +39,7 @@ return new class extends Migration
             $table->index(['type', 'should_display_on_index']);
         });
 
-        $schema->create('telescope_entries_tags', function (Blueprint $table) {
+        $schema->create('app.telescope_entries_tags', function (Blueprint $table) {
             $table->uuid('entry_uuid');
             $table->string('tag');
 
@@ -47,11 +48,11 @@ return new class extends Migration
 
             $table->foreign('entry_uuid')
                 ->references('uuid')
-                ->on('telescope_entries')
+                ->on('app.telescope_entries')
                 ->onDelete('cascade');
         });
 
-        $schema->create('telescope_monitoring', function (Blueprint $table) {
+        $schema->create('app.telescope_monitoring', function (Blueprint $table) {
             $table->string('tag')->primary();
         });
     }
@@ -63,8 +64,8 @@ return new class extends Migration
     {
         $schema = Schema::connection($this->getConnection());
 
-        $schema->dropIfExists('telescope_entries_tags');
-        $schema->dropIfExists('telescope_entries');
-        $schema->dropIfExists('telescope_monitoring');
+        $schema->dropIfExists('app.telescope_entries_tags');
+        $schema->dropIfExists('app.telescope_entries');
+        $schema->dropIfExists('app.telescope_monitoring');
     }
 };
